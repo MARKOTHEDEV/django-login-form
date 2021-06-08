@@ -6,20 +6,20 @@ from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin,BaseUse
 
 class myUserManager(BaseUserManager):
     
-    def create_user(self,email,password=None):
+    def create_user(self,email,username,password=None):
         "this function helps create a MyUser Instance"
 
         email = self.normalize_email(email)
 
-        user = self.model(email=email)
+        user = self.model(email=email,username=username)
         user.set_password(password)
         user.save(using=self._db)
 
         return user
 
-    def create_superuser(self,email,password=None):
+    def create_superuser(self,email,username,password=None):
         'create superuser -> help to create user that have admin access'
-        user = self.create_user(email,password)
+        user = self.create_user(email,username,password)
         user.is_superuser=True
         user.is_staff=True
         user.save()
@@ -31,14 +31,15 @@ class myUserManager(BaseUserManager):
 
 class myUser(PermissionsMixin,AbstractBaseUser):
     "this is the custom user model that the whole application will be using instead of django defualt! "
-    email = models.EmailField(unique=True)
-    # name = models.CharField(max_length=100)
+    email = models.EmailField()
+    username = models.CharField(unique=True,max_length=100,default='john')
     is_active =  models.BooleanField(default=True)
     is_staff =  models.BooleanField(default=False)
 
     objects = myUserManager()
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'username'
 
+    REQUIRED_FIELDS = ['email',]
 
     def __str__ (self):
         return self.email
